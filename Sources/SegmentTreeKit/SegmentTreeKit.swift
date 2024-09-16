@@ -75,7 +75,7 @@ public struct SegmentTree<Node: STNode>: Collection {
 
 extension SegmentTree: ExpressibleByArrayLiteral  {
     public typealias ArrayLiteralElement = Node
-    public init(arrayLiteral elements: Node...) {
+    public init(from elements: [Node]) {
         self.init(capacity: elements.count)
         
         for (i, node) in elements.enumerated() {
@@ -83,6 +83,10 @@ extension SegmentTree: ExpressibleByArrayLiteral  {
         }
         
         self.build()
+    }
+    
+    public init(arrayLiteral elements: Node...) {
+        self.init(from: elements)
     }
 }
 

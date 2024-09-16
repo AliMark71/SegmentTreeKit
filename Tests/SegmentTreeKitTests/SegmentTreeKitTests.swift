@@ -11,7 +11,7 @@ final class SegmentTreeKitTests: XCTestCase {
     }
     
     func testElementModifing() throws {
-        var tree: SegmentTree<Int> = [1, 4, 3, 5, 0, 4]
+        var tree = SegmentTree(from: [1, 4, 3, 5, 0, 4])
         
         XCTAssertEqual(tree[0], 1)
         XCTAssertNotEqual(tree[0], tree[1])
@@ -29,7 +29,7 @@ final class SegmentTreeKitTests: XCTestCase {
         // Defining Test Cases and Test Methods
         // https://developer.apple.com/documentation/xctest/defining_test_cases_and_test_methods
         
-        let tree: SegmentTree<Int> = [1, 4, 3, 5, 0, 4]
+        let tree: SegmentTree = [1, 4, 3, 5, 0, 4]
         
         XCTAssertEqual(tree[0], 1)
         XCTAssertEqual(tree[3], 5)
@@ -39,7 +39,7 @@ final class SegmentTreeKitTests: XCTestCase {
     }
     
     func testStaticRangeSum() throws {
-        let tree: SegmentTree<Int> = [1, 4, -3, 5, 0, 4]
+        let tree: SegmentTree = [1, 4, -3, 5, 0, 4]
         
         XCTAssertEqual(tree[0..<2], 5)
         XCTAssertEqual(tree[0..<3], 2)
@@ -47,7 +47,7 @@ final class SegmentTreeKitTests: XCTestCase {
     }
     
     func testDynamicRangeSum() throws {
-        var tree: SegmentTree<Int> = [1, 4, -3, 5, 0, 4]
+        var tree: SegmentTree = [1, 4, -3, 5, 0, 4]
         
         XCTAssertEqual(tree[0..<2], 5)
         XCTAssertEqual(tree[0..<3], 2)
