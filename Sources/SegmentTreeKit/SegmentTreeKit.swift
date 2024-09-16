@@ -2,17 +2,18 @@
 // https://docs.swift.org/swift-book
 
 public struct SegmentTree<Node: STNode>: Collection {
-    private var data:       [Node]
-    private let offset:     Int
-    private let size:       Int
+    private var data: [Node]
+    private let offset: Int
+    private let size: Int
     private let updateType: STUpdateType
     
-    public var startIndex: Int { return 0 }
-    public var endIndex: Int   { return size }
+    public var startIndex: Int { 0 }
+    public var endIndex: Int { size }
+    public var bounds: Range<Int> { startIndex..<endIndex }
     
     public init(capacity size: Int, of nodeType: Node.Type = Node.self, fill: Node = Node(), updateType: STUpdateType = .immediate) {
-        if size.nonzeroBitCount == 1 { self.offset = size }
-        else { self.offset = 1<<(Int.bitWidth - size.leadingZeroBitCount) }
+        self.offset = if size.nonzeroBitCount == 1 { size }
+                      else { 1<<(Int.bitWidth - size.leadingZeroBitCount) }
 
         self.size = size
         self.data = Array(repeating: fill, count: 2 * self.offset)
@@ -39,27 +40,28 @@ public struct SegmentTree<Node: STNode>: Collection {
         if queryBounds.contains(bounds) { return data[index] }
         else if !queryBounds.overlaps(bounds) { return nil }
         else {
-            let mid = (bounds.lowerBound + bounds.upperBound) / 2
+            let mid = bounds.lowerBound + ((bounds.upperBound - bounds.lowerBound) / 2)
             let lhs = query(index: index * 2,     bounds: bounds.lowerBound..<mid, queryBounds: queryBounds)
             let rhs = query(index: index * 2 + 1, bounds: mid..<bounds.upperBound, queryBounds: queryBounds)
             
-            guard lhs != nil || rhs != nil else {
-                fatalError("Unreachable Code: result of overlapping-bounds query function returned nil in both halfs")
-            }
+            precondition(lhs != nil || rhs != nil,
+                         "Unreachable Code: result of overlapping-bounds query function returned nil in both halfs")
             
-            guard let lhs = lhs else { return rhs }
-            guard let rhs = rhs else { return lhs }
+            guard let lhs else { return rhs }
+            guard let rhs else { return lhs }
             
             return Node.Merge(lhs: lhs, rhs: rhs)
         }
     }
     
     public subscript(bounds: Range<Int>) -> Node {
-        query(index: 1, bounds: 0..<self.offset, queryBounds: bounds)!
+        precondition(self.bounds.contains(bounds), "Range Query on invalid range!")
+        return query(index: 1, bounds: 0..<self.offset, queryBounds: bounds)!
     }
     
     public subscript(bounds: ClosedRange<Int>) -> Node {
-        query(index: 1, bounds: 0..<self.offset, queryBounds: bounds.lowerBound..<bounds.upperBound+1)!
+        precondition(self.bounds.contains(bounds), "Range Query on invalid range!")
+        return query(index: 1, bounds: 0..<self.offset, queryBounds: bounds.lowerBound..<bounds.upperBound+1)!
     }
     
     public func index(after i: Int) -> Int {
@@ -75,8 +77,8 @@ public struct SegmentTree<Node: STNode>: Collection {
 
 extension SegmentTree: ExpressibleByArrayLiteral  {
     public typealias ArrayLiteralElement = Node
-    public init(from elements: [Node]) {
-        self.init(capacity: elements.count)
+    public init(from elements: [Node], updateType: STUpdateType = .immediate) {
+        self.init(capacity: elements.count, updateType: updateType)
         
         for (i, node) in elements.enumerated() {
             self.data[i + self.offset] = node
@@ -99,7 +101,6 @@ public protocol STNode {
 
 public enum STUpdateType {
     case immediate
-    
     case manual
 }
 

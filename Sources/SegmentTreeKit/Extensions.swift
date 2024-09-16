@@ -11,13 +11,18 @@ extension Range {
     func contains(_ other: Range) -> Bool {
         self.lowerBound <= other.lowerBound && other.upperBound <= self.upperBound
     }
+    
+    func contains(_ other: ClosedRange<Bound>) -> Bool {
+        self.lowerBound <= other.lowerBound && other.upperBound < self.upperBound
+    }
 }
 
-extension Int: STNode {}
-extension Double: STNode {}
-
-extension STNode where Self: AdditiveArithmetic {
-    public static func Merge(lhs: Self, rhs: Self) -> Self {
-        lhs + rhs
+extension ClosedRange {
+    func contains(_ other: ClosedRange) -> Bool {
+        self.lowerBound <= other.lowerBound && other.upperBound <= self.upperBound
+    }
+    
+    func contains(_ other: Range<Bound>) -> Bool {
+        self.lowerBound <= other.lowerBound && self.upperBound < other.upperBound
     }
 }

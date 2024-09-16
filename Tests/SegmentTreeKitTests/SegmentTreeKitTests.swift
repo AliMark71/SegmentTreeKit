@@ -1,100 +1,162 @@
-import XCTest
+import Testing
 @testable import SegmentTreeKit
 
-final class SegmentTreeKitTests: XCTestCase {
-    func testInit() throws {
+struct MinInt: STNode, ExpressibleByIntegerLiteral, Comparable {
+    typealias IntegerLiteralType = Int
+    
+    let num: Int
+    
+    init() { self.init(Int.max) }
+    init(_ num: Int) { self.num = num }
+    init(integerLiteral value: Int) { self.init(value) }
+    
+    static func Merge(lhs: MinInt, rhs: MinInt) -> MinInt {
+        min(lhs, rhs)
+    }
+    
+    static func < (lhs: MinInt, rhs: MinInt) -> Bool {
+        lhs.num < rhs.num
+    }
+}
+
+struct MaxInt: STNode, ExpressibleByIntegerLiteral, Comparable {
+    typealias IntegerLiteralType = Int
+    
+    let num: Int
+    
+    init() { self.init(Int.min) }
+    init(_ num: Int) { self.num = num }
+    init(integerLiteral value: Int) { self.init(value) }
+    
+    static func Merge(lhs: MaxInt, rhs: MaxInt) -> MaxInt {
+        max(lhs, rhs)
+    }
+    
+    static func < (lhs: MaxInt, rhs: MaxInt) -> Bool {
+        lhs.num < rhs.num
+    }
+}
+
+extension Int: @retroactive STNode {
+    public static func Merge(lhs: Int, rhs: Int) -> Int {
+        lhs + rhs
+    }
+}
+
+extension Tag {
+    enum rangeQueries {
+        @Tag static var min: Tag
+        @Tag static var max: Tag
+        @Tag static var sum: Tag
+        
+        @Tag static var `static`: Tag
+        @Tag static var dynamic: Tag
+    }
+}
+
+struct SegmentTreeKitTests {
+    @Test("test some initializer methods")
+    func `init`() {
         let ST1 = SegmentTree(capacity: 5, of: Int.self)
         let ST2 = SegmentTree<Int>(capacity: 5)
         
-        XCTAssertEqual(ST1[0], ST2[0])
-        XCTAssertEqual(ST1[2], ST2[4])
+        #expect(ST1[0] == ST2[0])
+        #expect(ST1[2] == ST2[4])
     }
     
-    func testElementModifing() throws {
-        var tree = SegmentTree(from: [1, 4, 3, 5, 0, 4])
+    @Test("test modifying some elements")
+    func elementModifing() {
+        var tree: SegmentTree<Int> = [1, 4, 3, 5, 0, 4]
         
-        XCTAssertEqual(tree[0], 1)
-        XCTAssertNotEqual(tree[0], tree[1])
+        #expect(tree[0] == 1)
+        #expect(tree[0] != tree[1])
         
         tree[0] = tree[1]
         
-        XCTAssertNotEqual(tree[0], 1)
-        XCTAssertEqual(tree[0], tree[1])
+        #expect(tree[0] != 1)
+        #expect(tree[0] == tree[1])
     }
     
-    func testElementAccess() throws {
-        // XCTest Documentation
-        // https://developer.apple.com/documentation/xctest
-
-        // Defining Test Cases and Test Methods
-        // https://developer.apple.com/documentation/xctest/defining_test_cases_and_test_methods
-        
+    @Test("test accessing some elements")
+    func elementAccess() {
         let tree: SegmentTree = [1, 4, 3, 5, 0, 4]
         
-        XCTAssertEqual(tree[0], 1)
-        XCTAssertEqual(tree[3], 5)
-        XCTAssertEqual(tree[1], tree[5])
-        XCTAssertEqual(tree.first!, 1)
-        XCTAssertNotEqual(tree[0], tree[1])
+        #expect(tree[0] == 1)
+        #expect(tree[3] == 5)
+        #expect(tree[1] == tree[5])
+        #expect(tree.first! == 1)
+        #expect(tree[0] != tree[1])
     }
     
-    func testStaticRangeSum() throws {
-        let tree: SegmentTree = [1, 4, -3, 5, 0, 4]
-        
-        XCTAssertEqual(tree[0..<2], 5)
-        XCTAssertEqual(tree[0..<3], 2)
-        XCTAssertEqual(tree[3...5], 9)
-    }
-    
-    func testDynamicRangeSum() throws {
-        var tree: SegmentTree = [1, 4, -3, 5, 0, 4]
-        
-        XCTAssertEqual(tree[0..<2], 5)
-        XCTAssertEqual(tree[0..<3], 2)
-        tree[2] = 2
-        XCTAssertEqual(tree[0..<3], 7)
-        XCTAssertEqual(tree[3...5], 9)
-    }
-    
-    struct MinInt: STNode, ExpressibleByIntegerLiteral, Equatable {
-        typealias IntegerLiteralType = Int
-        
-        let num: Int
-        
-        init() { self.init(0) }
-        init(_ num: Int) {
-            self.num = num
-        }
-        init(integerLiteral value: Int) {
-            self.init(value)
+    @Suite("Range Queries")
+    struct rangeQueries {
+        @Test("Static Range Min", .tags(.rangeQueries.min, .rangeQueries.static))
+        func staticRangeMin() {
+            let tree: SegmentTree<MinInt> = [1, 4, -3, 5, 0, 4]
+            
+            #expect(tree[0..<2] == 1)
+            #expect(tree[0..<3] == -3)
+            #expect(tree[3...5] == 0)
         }
         
-        static func Merge(lhs: MinInt, rhs: MinInt) -> MinInt {
-            if lhs.num < rhs.num { return lhs }
-            else { return rhs }
+        @Test("Dynamic Range Min", .tags(.rangeQueries.min, .rangeQueries.dynamic))
+        func dynamicRangeMin() {
+            var tree: SegmentTree<MinInt> = [1, 4, -3, 5, 0, 4]
+            
+            #expect(tree[0..<2] == 1)
+            #expect(tree[0..<3] == -3)
+            tree[2] = 2
+            #expect(tree[0..<3] == 1)
+            #expect(tree[3...5] == 0)
+            #expect(tree[0..<2] == tree[0..<3])
+            tree[0] = 6
+            tree[4] = 9
+            #expect(tree[0..<tree.count] == 2)
         }
-    }
-    
-    func testStaticRangeMin() throws {
-        let tree: SegmentTree<MinInt> = [1, 4, -3, 5, 0, 4]
         
-        XCTAssertEqual(tree[0..<2], 1)
-        XCTAssertEqual(tree[0..<3], -3)
-        XCTAssertEqual(tree[3...5], 0)
-    }
-    
-    func testDynamicRangeMin() throws {
-        var tree: SegmentTree<MinInt> = [1, 4, -3, 5, 0, 4]
+        @Test("Static Range Max", .tags(.rangeQueries.max, .rangeQueries.static))
+        func staticRangeMax() {
+            let tree: SegmentTree<MaxInt> = [1, 4, -3, 5, 0, 4]
+            
+            #expect(tree[0..<2] == 4)
+            #expect(tree[0..<3] == 4)
+            #expect(tree[3...5] == 5)
+        }
         
-        XCTAssertEqual(tree[0..<2], 1)
-        XCTAssertEqual(tree[0..<3], -3)
-        tree[2] = 2
-        XCTAssertEqual(tree[0..<3], 1)
-        XCTAssertEqual(tree[3...5], 0)
-        XCTAssertEqual(tree[0..<2], tree[0..<3])
-        tree[0] = 6
-        tree[4] = 9
-        XCTAssertEqual(tree[0..<tree.count], 2)
+        @Test("Dynamic Range Max", .tags(.rangeQueries.max, .rangeQueries.dynamic))
+        func dynamicRangeMax() {
+            var tree: SegmentTree<MaxInt> = [1, 4, -3, 5, 0, 4]
+            
+            #expect(tree[0..<2] == 4)
+            #expect(tree[0..<3] == 4)
+            tree[2] = 6
+            #expect(tree[0..<3] == 6)
+            #expect(tree[3...5] == 5)
+            #expect(tree[0..<3] == tree[2..<4])
+            tree[0] = 6
+            tree[4] = 9
+            #expect(tree[0..<tree.count] == 9)
+        }
+        
+        @Test("Static Range Sum", .tags(.rangeQueries.sum, .rangeQueries.static))
+        func staticRangeSum() {
+            let tree: SegmentTree = [1, 4, -3, 5, 0, 4]
+            
+            #expect(tree[0..<2] == 5)
+            #expect(tree[0..<3] == 2)
+            #expect(tree[3...5] == 9)
+        }
+        
+        @Test("Dynamic Range Sum", .tags(.rangeQueries.sum, .rangeQueries.dynamic))
+        func dynamicRangeSum() {
+            var tree: SegmentTree = [1, 4, -3, 5, 0, 4]
+            
+            #expect(tree[0..<2] == 5)
+            #expect(tree[0..<3] == 2)
+            tree[2] = 2
+            #expect(tree[0..<3] == 7)
+            #expect(tree[3...5] == 9)
+        }
     }
 }
 
