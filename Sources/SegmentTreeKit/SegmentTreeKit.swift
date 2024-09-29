@@ -56,12 +56,12 @@ public struct SegmentTree<Node: STNode>: Collection {
     
     public subscript(bounds: Range<Int>) -> Node {
         precondition(self.bounds.contains(bounds), "Range Query on invalid range!")
-        return query(index: 1, bounds: 0..<self.offset, queryBounds: bounds)!
+        return query(index: 1, bounds: 0..<self.offset, queryBounds: bounds) !! "Query on valid range must always return a `Node`"
     }
     
     public subscript(bounds: ClosedRange<Int>) -> Node {
         precondition(self.bounds.contains(bounds), "Range Query on invalid range!")
-        return query(index: 1, bounds: 0..<self.offset, queryBounds: bounds.lowerBound..<bounds.upperBound+1)!
+        return query(index: 1, bounds: 0..<self.offset, queryBounds: bounds.lowerBound..<bounds.upperBound+1) !! "Query on valid range must always return a `Node`"
     }
     
     public func index(after i: Int) -> Int {

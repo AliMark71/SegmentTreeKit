@@ -26,3 +26,14 @@ extension ClosedRange {
         self.lowerBound <= other.lowerBound && self.upperBound < other.upperBound
     }
 }
+
+infix operator !!
+
+extension Optional {
+    static func !! (lhs: Self, rhs: String) -> Wrapped {
+        guard let lhs else {
+            fatalError("Error while force-unwrapping: \(rhs)")
+        }
+        return lhs
+    }
+}

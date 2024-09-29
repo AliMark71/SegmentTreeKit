@@ -1,59 +1,6 @@
 import Testing
 @testable import SegmentTreeKit
 
-struct MinInt: STNode, ExpressibleByIntegerLiteral, Comparable {
-    typealias IntegerLiteralType = Int
-    
-    let num: Int
-    
-    init() { self.init(Int.max) }
-    init(_ num: Int) { self.num = num }
-    init(integerLiteral value: Int) { self.init(value) }
-    
-    static func Merge(lhs: MinInt, rhs: MinInt) -> MinInt {
-        min(lhs, rhs)
-    }
-    
-    static func < (lhs: MinInt, rhs: MinInt) -> Bool {
-        lhs.num < rhs.num
-    }
-}
-
-struct MaxInt: STNode, ExpressibleByIntegerLiteral, Comparable {
-    typealias IntegerLiteralType = Int
-    
-    let num: Int
-    
-    init() { self.init(Int.min) }
-    init(_ num: Int) { self.num = num }
-    init(integerLiteral value: Int) { self.init(value) }
-    
-    static func Merge(lhs: MaxInt, rhs: MaxInt) -> MaxInt {
-        max(lhs, rhs)
-    }
-    
-    static func < (lhs: MaxInt, rhs: MaxInt) -> Bool {
-        lhs.num < rhs.num
-    }
-}
-
-extension Int: @retroactive STNode {
-    public static func Merge(lhs: Int, rhs: Int) -> Int {
-        lhs + rhs
-    }
-}
-
-extension Tag {
-    enum rangeQueries {
-        @Tag static var min: Tag
-        @Tag static var max: Tag
-        @Tag static var sum: Tag
-        
-        @Tag static var `static`: Tag
-        @Tag static var dynamic: Tag
-    }
-}
-
 struct SegmentTreeKitTests {
     @Test("test some initializer methods")
     func `init`() {
@@ -160,3 +107,55 @@ struct SegmentTreeKitTests {
     }
 }
 
+struct MinInt: STNode, ExpressibleByIntegerLiteral, Comparable {
+    typealias IntegerLiteralType = Int
+    
+    let num: Int
+    
+    init() { self.init(Int.max) }
+    init(_ num: Int) { self.num = num }
+    init(integerLiteral value: Int) { self.init(value) }
+    
+    static func Merge(lhs: MinInt, rhs: MinInt) -> MinInt {
+        min(lhs, rhs)
+    }
+    
+    static func < (lhs: MinInt, rhs: MinInt) -> Bool {
+        lhs.num < rhs.num
+    }
+}
+
+struct MaxInt: STNode, ExpressibleByIntegerLiteral, Comparable {
+    typealias IntegerLiteralType = Int
+    
+    let num: Int
+    
+    init() { self.init(Int.min) }
+    init(_ num: Int) { self.num = num }
+    init(integerLiteral value: Int) { self.init(value) }
+    
+    static func Merge(lhs: MaxInt, rhs: MaxInt) -> MaxInt {
+        max(lhs, rhs)
+    }
+    
+    static func < (lhs: MaxInt, rhs: MaxInt) -> Bool {
+        lhs.num < rhs.num
+    }
+}
+
+extension Int: STNode {
+    public static func Merge(lhs: Int, rhs: Int) -> Int {
+        lhs + rhs
+    }
+}
+
+extension Tag {
+    enum rangeQueries {
+        @Tag static var min: Tag
+        @Tag static var max: Tag
+        @Tag static var sum: Tag
+        
+        @Tag static var `static`: Tag
+        @Tag static var dynamic: Tag
+    }
+}
