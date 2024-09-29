@@ -5,17 +5,32 @@ name: Swift
 
 on:
   push:
-    branches: [ "main" ]
+    branches: 
+      - "**"
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - "**"
 
 jobs:
   build:
 
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+    - name: Install Swift 6.0.1 Toolchain
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang libcurl4-openssl-dev libsqlite3-dev libblocksruntime-dev
+        UBUNTU_VER="$(lsb_release -rs)"
+        SWIFT_TOOLCHAIN_VER="6.0.1"
+        SWIFT_TOOLCHAIN_FILE="swift-$SWIFT_TOOLCHAIN_VER-RELEASE-ubuntu$UBUNTU_VER"
+        SWIFT_TOOLCHAIN_ZIP="$SWIFT_TOOLCHAIN_FILE.tar.gz"
+        SWIFT_URL="https://download.swift.org/swift-$SWIFT_TOOLCHAIN_VER-release/ubuntu`echo $UBUNTU_VER | tr -cd '[:alnum:]'`/swift-$SWIFT_TOOLCHAIN_VER-RELEASE/$SWIFT_TOOLCHAIN_ZIP"
+        wget $SWIFT_URL
+        tar xzf $SWIFT_TOOLCHAIN_ZIP
+        sudo mv $SWIFT_TOOLCHAIN-FILE /usr/local/swift
+        echo "/usr/local/swift/usr/bin" >> $GITHUB_PATH
     - name: Build
       run: swift build -v
     - name: Run tests
