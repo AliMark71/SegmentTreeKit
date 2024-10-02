@@ -11,7 +11,7 @@ extension Range {
     func contains(_ other: Range) -> Bool {
         self.lowerBound <= other.lowerBound && other.upperBound <= self.upperBound
     }
-    
+
     func contains(_ other: ClosedRange<Bound>) -> Bool {
         self.lowerBound <= other.lowerBound && other.upperBound < self.upperBound
     }
@@ -21,7 +21,7 @@ extension ClosedRange {
     func contains(_ other: ClosedRange) -> Bool {
         self.lowerBound <= other.lowerBound && other.upperBound <= self.upperBound
     }
-    
+
     func contains(_ other: Range<Bound>) -> Bool {
         self.lowerBound <= other.lowerBound && self.upperBound < other.upperBound
     }
